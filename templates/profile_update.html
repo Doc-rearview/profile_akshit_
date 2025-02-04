@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile Update</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h2>Update Profile for {{ username }}</h2>
+        <form action="/profile" method="POST" enctype="multipart/form-data">
+            <div>
+              <label for="profile_pic">Profile Picture:</label>
+              <input type="file" name="profile_pic" accept="image/*">
+            </div>
+            <div>
+              <label for="cv_file">Upload CV:</label>
+              <input type="file" name="cv_file" accept=".pdf">
+            </div>
+            <div>
+                <div>
+                    <label for="skill_name">Skill Name:</label>
+                    <input type="text" name="skill_name" placeholder="Skill name" >
+                </div>
+                <div>
+                    <label for="skill_description">Skill Description:</label>
+                    <textarea name="skill_description" placeholder="Describe the skill" ></textarea>
+                </div>
+                <div>
+                    <input type="file" name="skill_image" placeholder="Image upload">
+                </div>
+            </div>
+            <div>
+                <label for="project_name">Project Name:</label>
+                <input type="text" name="project_name" >
+              </div>
+              <div>
+                <label for="project_description">Project Description:</label>
+                <textarea name="project_description" ></textarea>
+              </div>
+              <div>
+                <label for="project_link">Project Link:</label>
+                <input type="text" name="project_link">
+              </div>
+              <div>
+                <label for="project_image">Upload Project Image:</label>
+                <input type="file" name="project_image" accept="image/*">
+              </div>
+            <button type="submit">Update Profile</button>
+          </form>
+          <h2>Education</h2>
+<form action="/profile" method="POST">
+    <div>
+        <label for="degree">Degree:</label>
+        <input type="text" name="degree" placeholder="e.g., B.Tech" >
+    </div>
+    <div>
+        <label for="institution">Institution:</label>
+        <input type="text" name="institution" placeholder="e.g., XYZ University" >
+    </div>
+    <div>
+        <label for="year">Year:</label>
+        <input type="text" name="year" placeholder="e.g., 2023">
+    </div>
+    <label for="cgpa">CGPA (Optional):</label>
+    <input type="text" name="cgpa">
+
+    <label for="percentage">Percentage (Optional):</label>
+    <input type="text" name="percentage">
+    <button type="submit" name="add_education">Add Education</button>
+</form>
+
+<h3>Education List</h3>
+<ul>
+    {% for edu in education %}
+        <li>
+            {{ edu.degree }} from {{ edu.institution }} ({{ edu.year }})
+            <form action="{{ url_for('delete_education', edu_index=loop.index0) }}" method="post" style="display:inline;">
+                <button type="submit">Delete</button>
+            </form>
+        </li>
+    {% else %}
+        <li>No education added yet.</li>
+    {% endfor %}
+</ul>
+
+<h2>Skills</h2>
+<ul>
+    {% for skill in skills %}
+        <li>
+            <img src="{{ skill.image }}" alt="{{ skill.name }}" class="skill-image" />
+            {{ skill.name }}
+            <form action="{{ url_for('delete_skill', skill_index=loop.index0) }}" method="post" style="display:inline;">
+                <button type="submit">Delete</button>
+            </form>
+        </li>
+    {% else %}
+        <li>No skills added yet.</li>
+    {% endfor %}
+</ul>
+          
+<h2>Projects</h2>
+<ul>
+  {% for project in projects %}
+  <li>
+    <h3>{{ project.name }}</h3>
+    <p>{{ project.description }}</p>
+    {% if project.image %}
+    <img src="{{ url_for('static', filename=project.image.replace('\\', '/')) }}" alt="{{ project.name }}">
+
+    {% else %}
+    <p>No image available</p>
+    {% endif %}
+    <form action="{{ url_for('delete_project', project_index=loop.index0) }}" method="post" style="display:inline;">
+      <button type="submit">Delete</button>
+    </form>
+  </li>
+  {% else %}
+  <li>No projects added yet.</li>
+  {% endfor %}
+</ul>
+          
+        <a href="/logout">Logout</a>
+        
+        <h2>Your Skills</h2>
+        <div class="skills-grid">
+            {% for skill in skills %}
+            <div class="card">
+                <div class="content">
+                    <div class="front">
+                        <small class="badge">{{ skill.name }}</small>
+                        <div class="description">
+                            <strong>{{ skill.description }}</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <h2>Projects</h2>
+        <ul>
+            {% for project in projects %}
+                <li>
+                    <h3>{{ project.name }}</h3>
+                    <p>{{ project.description }}</p>
+                    {% if project.link %}
+                        <a href="{{ project.link }}" target="_blank">View Project</a>
+                    {% endif %}
+                    <div>
+                        {% for project in projects %}
+                        {% if project.image %}
+                            <img src="{{ url_for('static', filename=project.image) }}" alt="{{ project.name }}">
+                        {% else %}
+                            <p>No image available</p>
+                        {% endif %}
+                    {% endfor %}
+                    </div>
+                </li>
+            {% else %}
+                <li>No projects added yet.</li>
+            {% endfor %}
+        </ul>
+       
+
+    </div>
+</body>
+</html>

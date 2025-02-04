@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Akshit Sharma - Profile</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+  <div id="particles-js"></div>
+  <header>
+    <div class="signature">Akshit Sharma</div>
+    <div class="hamburger" id="hamburger">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+    <nav id="nav">
+      <ul>
+        <li><a href="#home">Home</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a href="#skills">Skills</a></li>
+        <li><a href="#projects">Projects</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+      <div class="checkbox-wrapper-5">
+        <div class="check">
+          <input checked="" id="check-5" type="checkbox"></input>
+          <label for="check-5"></label>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Home Section -->
+  <section id="home">
+    <div class="home-content">
+      <h1>Hi, I'm Akshit Sharma</h1>
+      <div class="typing-container">
+        <span class="typing-effect"></span>
+      </div>
+    </div>
+    <img src="assets/mypic.jpg" alt="Akshit Sharma" class="profile-pic">
+  </section>
+
+  <!-- About Section -->
+  <section id="about">
+    <h2>About Me</h2>
+    <p>Write a short bio about yourself here.</p>
+  </section>
+
+  <!-- Skills Section -->
+  <section id="skills">
+    <h2>Skills</h2>
+    <div class="skills-grid">
+      <div class="skill-card">
+        <h3>HTML, CSS, JavaScript</h3>
+      </div>
+      <div class="skill-card">
+        <h3>React, Node.js</h3>
+      </div>
+      <div class="skill-card">
+        <h3>UI/UX Design</h3>
+      </div>
+    </div>
+  </section>
+
+  <!-- Projects Section -->
+  <section id="projects">
+    <h2>Projects</h2>
+    <div class="project-grid">
+      <div class="project-card">
+        <h3>Project 1</h3>
+        <p>Description of Project 1.</p>
+      </div>
+      <div class="project-card">
+        <h3>Project 2</h3>
+        <p>Description of Project 2.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Section -->
+  <section id="contact">
+    <h2>Contact</h2>
+    <form>
+      <input type="text" placeholder="Your Name" required>
+      <input type="email" placeholder="Your Email" required>
+      <textarea placeholder="Your Message" required></textarea>
+      <button type="submit">Send</button>
+    </form>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <p>&copy; 2025 Akshit Sharma. All rights reserved.</p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+  <script>
+    // Theme Toggle
+    const themeToggle = document.getElementById('theme-toggle');
+    const body = document.body;
+
+    themeToggle.addEventListener('click', () => {
+      body.classList.toggle('dark-theme');
+      localStorage.setItem('theme', body.classList.contains('dark-theme') ? 'dark' : 'light');
+    });
+
+    // Load saved theme
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+      body.classList.add('dark-theme');
+    }
+
+    // Particles.js Background
+    particlesJS.load('particles-js', 'particles.json', function() {
+      console.log('Particles.js loaded');
+    });
+
+    // Typing Effect
+    const textLines = [
+      "Building intelligent solutions, one algorithm at a time.",
+      "Turning data into decisions, and ideas into apps.",
+      "AI-driven innovation meets seamless app experiences."
+    ];
+
+    const typingElement = document.querySelector(".typing-effect");
+    let lineIndex = 0;
+
+    function typeText(line) {
+      typingElement.textContent = "";
+      let charIndex = 0;
+
+      let typingInterval = setInterval(() => {
+        if (charIndex < line.length) {
+          typingElement.textContent += line.charAt(charIndex);
+          charIndex++;
+        } else {
+          clearInterval(typingInterval);
+          setTimeout(() => {
+            typingElement.textContent = "";
+            lineIndex = (lineIndex + 1) % textLines.length;
+            typeText(textLines[lineIndex]);
+          }, 2000);
+        }
+      }, 50);
+    }
+
+    typeText(textLines[lineIndex]);
+
+    // Hamburger Menu Toggle
+    const hamburger = document.getElementById('hamburger');
+    const nav = document.getElementById('nav');
+
+    hamburger.addEventListener('click', () => {
+      nav.classList.toggle('active');
+    });
+  </script>
+</body>
+</html>
