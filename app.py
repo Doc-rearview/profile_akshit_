@@ -1,9 +1,15 @@
 from flask import Flask, render_template, request, redirect, url_for, send_file, flash, session
+from flask_sqlalchemy import SQLAlchemy
 import os
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # Required for session management
+
+# Database configuration
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///portfolio.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)
 
 # Configuration for file uploads
 UPLOAD_FOLDER = 'static/uploads'
@@ -18,13 +24,32 @@ USERS = {
     "123": "123",
 }
 
-# Dummy data for skills and projects (replace with a database in production)
-skills = []
-projects = []
-education = []
-PROJECTS_UPLOAD_FOLDER = os.path.join(app.config['UPLOAD_FOLDER'], 'projects')
-os.makedirs(PROJECTS_UPLOAD_FOLDER, exist_ok=True)
+# Database Models
+class Skill(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.String(500), nullable=False)
+    image = db.Column(db.String(200))
 
+class Project(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.String(500), nullable=False)
+    image = db.Column(db.String(200))
+    link = db.Column(db.String(200))
+
+class Education(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    degree = db.Column(db.String(100), nullable=False)
+    institution = db.Column(db.String(200), nullable=False)
+    year = db.Column(db.String(50), nullable=False)
+    course = db.Column(db.String(50))
+    cgpa = db.Column(db.String(50))
+    percentage = db.Column(db.String(50))
+
+# Create the database tables
+with app.app_context():
+    db.create_all()
 
 # Helper function to check allowed file extensions
 def allowed_file(filename):
@@ -33,6 +58,9 @@ def allowed_file(filename):
 # Home route
 @app.route('/')
 def index():
+    skills = Skill.query.all()
+    projects = Project.query.all()
+    education = Education.query.all()
     return render_template('index.html', skills=skills, projects=projects, education=education)
 
 # Download CV route
@@ -71,31 +99,15 @@ def profile_update():
             degree = request.form.get('degree')
             institution = request.form.get('institution')
             year = request.form.get('year')
-            cgpa = request.form.get('cgpa')  # New field
-            percentage = request.form.get('percentage')  # New field
+            course=request.form.get('Course')
+            cgpa = request.form.get('cgpa')
+            percentage = request.form.get('percentage')
 
             if degree and institution and year:
-                education.append({
-                    "degree": degree,
-                    "institution": institution,
-                    "year": year,
-                    "cgpa": cgpa if cgpa else None,  
-                    "percentage": percentage if percentage else None  
-                })
-
-        # Handle Profile Picture Upload
-        if 'profile_pic' in request.files:
-            profile_pic = request.files['profile_pic']
-            if profile_pic and allowed_file(profile_pic.filename):
-                filename = secure_filename(profile_pic.filename)
-                profile_pic.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-
-        # Handle CV Upload
-        if 'cv_file' in request.files:
-            cv_file = request.files['cv_file']
-            if cv_file and allowed_file(cv_file.filename):
-                filename = secure_filename(cv_file.filename)
-                cv_file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                new_education = Education(degree=degree, institution=institution, course=course, year=year, cgpa=cgpa, percentage=percentage)
+                db.session.add(new_education)
+                db.session.commit()
+                flash("Education added successfully!", "success")
 
         # Handle Skills
         skill_name = request.form.get('skill_name')
@@ -109,12 +121,12 @@ def profile_update():
                 image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
                 skill_image.save(image_path)
 
-            skills.append({
-                "name": skill_name,
-                "description": skill_description,
-                "image": image_path  
-            })
+            new_skill = Skill(name=skill_name, description=skill_description, image=image_path)
+            db.session.add(new_skill)
+            db.session.commit()
+            flash("Skill added successfully!", "success")
 
+        # Handle Projects
         project_name = request.form.get('project_name')
         project_description = request.form.get('project_description')
         project_image = request.files.get('project_image')
@@ -123,64 +135,58 @@ def profile_update():
         if project_name and project_description:
             image_path = None
             if project_image and allowed_file(project_image.filename):
-                # Save the image with the project name as the filename
                 filename = secure_filename(f"{project_name}.{project_image.filename.rsplit('.', 1)[1].lower()}")
-                image_path = os.path.join(PROJECTS_UPLOAD_FOLDER, filename)
+                image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
                 project_image.save(image_path)
 
-            projects.append({
-                "name": project_name,
-                "description": project_description,
-                "image": os.path.join('uploads/projects', filename) if image_path else None,
-                "link": project_link
-            })
+            new_project = Project(name=project_name, description=project_description, image=image_path, link=project_link)
+            db.session.add(new_project)
+            db.session.commit()
+            flash("Project added successfully!", "success")
 
-        flash("Profile updated successfully!", "success")
-        return redirect(url_for('profile_update'))
-
-
+    skills = Skill.query.all()
+    projects = Project.query.all()
+    education = Education.query.all()
     return render_template('profile_update.html', username=session['username'], skills=skills, projects=projects, education=education)
 
 # Route to delete a skill
-@app.route('/delete-skill/<int:skill_index>', methods=['POST'])
-def delete_skill(skill_index):
+@app.route('/delete-skill/<int:skill_id>', methods=['POST'])
+def delete_skill(skill_id):
     if 'username' not in session:
         return redirect(url_for('login'))
-    
-    if 0 <= skill_index < len(skills):
-        del skills[skill_index]
-        flash("Skill deleted successfully!", "success")
-    else:
-        flash("Invalid skill index!", "error")
 
+    skill = Skill.query.get_or_404(skill_id)
+    if skill.image and os.path.exists(skill.image):
+        os.remove(skill.image)  # Delete the associated image file
+    db.session.delete(skill)
+    db.session.commit()
+    flash("Skill deleted successfully!", "success")
     return redirect(url_for('profile_update'))
 
 # Route to delete a project
-@app.route('/delete-project/<int:project_index>', methods=['POST'])
-def delete_project(project_index):
+@app.route('/delete-project/<int:project_id>', methods=['POST'])
+def delete_project(project_id):
     if 'username' not in session:
         return redirect(url_for('login'))
-    
-    if 0 <= project_index < len(projects):
-        del projects[project_index]
-        flash("Project deleted successfully!", "success")
-    else:
-        flash("Invalid project index!", "error")
 
+    project = Project.query.get_or_404(project_id)
+    if project.image and os.path.exists(project.image):
+        os.remove(project.image)  # Delete the associated image file
+    db.session.delete(project)
+    db.session.commit()
+    flash("Project deleted successfully!", "success")
     return redirect(url_for('profile_update'))
 
 # Route to delete education entry
-@app.route('/delete-education/<int:edu_index>', methods=['POST'])
-def delete_education(edu_index):
+@app.route('/delete-education/<int:edu_id>', methods=['POST'])
+def delete_education(edu_id):
     if 'username' not in session:
         return redirect(url_for('login'))
-    
-    if 0 <= edu_index < len(education):
-        del education[edu_index]
-        flash("Education entry deleted successfully!", "success")
-    else:
-        flash("Invalid education entry!", "error")
 
+    education = Education.query.get_or_404(edu_id)
+    db.session.delete(education)
+    db.session.commit()
+    flash("Education entry deleted successfully!", "success")
     return redirect(url_for('profile_update'))
 
 # Logout route
