@@ -337,7 +337,7 @@
         <h3>{{ edu.degree }}</h3>
         <p><strong>Institution:</strong> {{ edu.institution }}</p>
         <p><strong>Year:</strong> {{ edu.year }}</p>
-        <p><strong>Board/Stream:</strong> {{ edu.board or edu.stream }}</p>
+        <p><strong>Board/Stream:</strong> {{ edu.course }}</p>
         <p><strong>Percentage/CGPA:</strong> {{ edu.percentage or edu.cgpa }}</p>
       </div>
       {% endfor %}
