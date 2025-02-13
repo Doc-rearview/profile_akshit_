@@ -21,7 +21,7 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # Dummy user data for login (replace with a database in production)
 USERS = {
-    "Akshit": "123",
+    #PASS:"PASS"
 }
 
 # Database Models
