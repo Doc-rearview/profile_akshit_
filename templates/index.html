@@ -304,7 +304,7 @@
           {% for project in projects %}
           <div class="project">
             {% if project.image %}
-            <img src="{{ url_for('static', filename= project.image.replace('\\', '/')) }}" alt="{{ project.name }}">
+            <img src="{{ project.image}}" alt="{{ project.name }}">
 
             {% else %}
             <p>No image available</p>
